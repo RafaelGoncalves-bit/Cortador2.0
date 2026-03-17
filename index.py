@@ -1,45 +1,53 @@
-import os
-import re
-import pdfplumber
-from pypdf import PdfReader, PdfWriter
+import tkinter as tk
+from tkinter import ttk, messagebox
+import pandas as pd
+from emailSender import enviarEmail
 
-arquivo_pdf = r"C:\Users\rafae\Downloads\holerites.pdf"
-pasta_saida = r"C:\Users\rafae\Downloads\Organizados"
+LINK_SHEETS = "https://docs.google.com/spreadsheets/d/1ktXVa6_N-J9OEYAN_b_gKqs9UA2MZxl1Zelg6SP6dOM"
 
-os.makedirs(pasta_saida, exist_ok=True)
-
-def extrair_nome(texto):
-    linhas = texto.splitlines()[:5]  # só primeiras linhas
-    topo = " ".join(linhas)
-
-    padrao = r"\d+\s+([A-ZÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+(?:\s+[A-ZÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+){1,3})"
+def disparar_automacao():
+    data_selecionada = dataInput.get().strip()
     
-    
-    match = re.search(padrao, topo)
-    if match:
-        nome = match.group(1).strip()
-        nome = nome[:-2]
-        nome = re.sub(r'[\\/*?:"<>|]', "", nome)
-        return nome
+    if not data_selecionada:
+        messagebox.showwarning("Atenção", "Por favor, insira a data da pasta (ex: 03/2026)")
+        return
 
-    return "Sem_Nome"
-
-reader = PdfReader(arquivo_pdf)
-
-with pdfplumber.open(arquivo_pdf) as pdf:
-    for i, pagina_pdfplumber in enumerate(pdf.pages):
-        texto = pagina_pdfplumber.extract_text() or ""
-        nome = extrair_nome(texto)
+    try:
+        url_csv = LINK_SHEETS.replace('/edit', '/export?format=csv') if "/edit" in LINK_SHEETS else LINK_SHEETS + '/export?format=csv'
+        df = pd.read_csv(url_csv)
         
+        sucessos = 0
+        for _, linha in df.iterrows():
+            # Passamos a data como novo parâmetro para o emailSender
+            res = enviarEmail(
+                str(linha['empresa']), 
+                linha['email'], 
+                linha['nome'], 
+                linha['link'],
+                data_selecionada
+            )
+            if res: sucessos += 1
+        
+        messagebox.showinfo("Sucesso", f"Processo concluído!\n{sucessos} pastas criadas e e-mails enviados.")
 
-        pasta_nome = os.path.join(pasta_saida, nome)
-        os.makedirs(pasta_nome, exist_ok=True)
+    except Exception as e:
+        messagebox.showerror("Erro de Conexão", f"Falha ao processar: {e}")
 
-        writer = PdfWriter()
-        writer.add_page(reader.pages[i])
+# --- Interface Gráfica ---
+window = tk.Tk()
+window.title("Cortador 2.0 - Agille & Melo")
+window.geometry("350x250")
 
-        caminho_saida = os.path.join(pasta_nome, f"pagina_{i+1}.pdf")
-        with open(caminho_saida, "wb") as f:
-            writer.write(f)
+# Campo para a Data
+ttk.Label(window, text="Digite o Mês/Ano da Pasta:").pack(pady=10)
+dataInput = ttk.Entry(window, width=20, justify="center")
+dataInput.insert(0, "03-2026") # Valor padrão sugestivo
+dataInput.pack(pady=5)
 
-print("Arquivos organizados por nome com sucesso.")
+label_info = ttk.Label(window, text="Ao iniciar, o sistema criará uma subpasta\nno Drive de cada colaborador com a data acima.", justify="center")
+label_info.pack(pady=15)
+
+botao_start = ttk.Button(window, text="CRIAR PASTAS E ENVIAR", command=disparar_automacao)
+botao_start.pack(pady=10)
+
+window.mainloop()
