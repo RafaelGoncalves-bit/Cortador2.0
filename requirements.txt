@@ -1,3 +1,0 @@
-pdfplumber
-pypdf
-pydrive2
