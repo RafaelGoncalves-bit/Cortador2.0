@@ -1,0 +1,21 @@
+# Ambientes virtuais
+venv/
+ENV/
+
+# Byte-compiled / arquivos do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configurações do Google API (Segurança)
+token.json
+credentials.json
+
+# Banco de dados local
+db.sqlite3
+
+# Variáveis de ambiente
+.env
+
+# Editor (VS Code)
+.vscode/
