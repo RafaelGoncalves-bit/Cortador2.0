@@ -11,14 +11,11 @@ def index(request):
 def processar_dados(request):
     if request.method == 'POST':
         data_sel = request.POST.get('data')
-        
-        # Aqui pegamos o arquivo bruto que está na memória RAM
         pdf_h = request.FILES.get('holerites')
         pdf_p = request.FILES.get('ponto')
 
         if data_sel and pdf_h and pdf_p:
             try:
-                # Passamos os objetos de arquivo diretamente para o script
                 cortar(data_sel, pdf_h, pdf_p)
                 messages.success(request, "Processamento concluído com sucesso!")
             except Exception as e:
