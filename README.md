@@ -1,1 +1,0 @@
-# Cortador2.0
