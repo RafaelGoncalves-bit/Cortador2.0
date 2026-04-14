@@ -1,29 +1,63 @@
 from PyPDF2 import PdfReader, PdfWriter
+import re
 
-def cortarHolerite(data, holerite): #Função que pega o holerite, o ponto e a data e corta eles
-        holerite.seek(0) 
-        pdfReader = PdfReader(holerite) #Cria um Objeto de ler PDF
-        numPages = len(pdfReader.pages) #Pega a quantidade de páginas
-        
-        for pageNumber in range(numPages): #Percorre as paginas de acordo com o numero ja pego anteriormente
-            pdfWriter = PdfWriter() #Cria um Objeto de escrever PDF
-            page = pdfReader.pages[pageNumber] #Pega a pagina atual
-            pdfWriter.add_page(page) #Cria uma cópia da pagina atual
-            
-            with open(f"pagina_{pageNumber + 1}.pdf", "wb") as outputPdf:
-                pdfWriter.write(outputPdf) 
+def extrairNomeH(texto):
+    linhas = texto.split('\n')
+
+    for linha in linhas:
+        if "/" in linha:
+            partes = linha.strip().split()
+
+            for i, parte in enumerate(partes):
+                if parte.isdigit():
+                    return " ".join(partes[i+1:])
+
+    return ""
+
+def extrairNomeP(texto):
+    linhas = texto.split('\n')
+
+    for linha in linhas:
+        linha = linha.strip()
+
+        if re.match(r'^[A-ZÀ-Ÿ\s]{5,}$', linha):
+            if "EMPRESA" not in linha and "DEPARTAMENTO" not in linha:
+                return linha
+
+    return ""
+
+def cortarHolerite(holerite):
+    holerite.seek(0)
+    pdfReader = PdfReader(holerite)
+    numPages = len(pdfReader.pages)
+
+    for pageNumber in range(numPages):
+        pdfWriter = PdfWriter()
+        page = pdfReader.pages[pageNumber]
+        pdfWriter.add_page(page)
+
+        with open(f"pagina_{pageNumber + 1}.pdf", "wb") as outputPdf:
+            pdfWriter.write(outputPdf)
+
+        texto = page.extract_text() or ""
+        nome = extrairNomeH(texto)
+
+        print(nome)
     
-def cortarPonto(data, ponto): #Função que pega o holerite, o ponto e a data e corta eles
-        ponto.seek(0) 
-        pdfReader = PdfReader(ponto) #Cria um Objeto de ler PDF
-        numPages = len(pdfReader.pages) #Pega a quantidade de páginas
-        
-        for pageNumber in range(numPages): #Percorre as paginas de acordo com o numero ja pego anteriormente
-            pdfWriter = PdfWriter() #Cria um Objeto de escrever PDF
-            page = pdfReader.pages[pageNumber] #Pega a pagina atual
-            pdfWriter.add_page(page) #Cria uma cópia da pagina atual
-            
-            with open(f"pagina_{pageNumber + 1}.pdf", "wb") as outputPdf:
-                pdfWriter.write(outputPdf)
-        
-        
+def cortarPonto(ponto):
+    ponto.seek(0)
+    pdfReader = PdfReader(ponto)
+    numPages = len(pdfReader.pages)
+
+    for pageNumber in range(numPages):
+        pdfWriter = PdfWriter()
+        page = pdfReader.pages[pageNumber]
+        pdfWriter.add_page(page)
+
+        texto = page.extract_text() or ""
+        nome = extrairNomeP(texto)
+
+        with open(f"{nome}_pagina_{pageNumber + 1}.pdf", "wb") as outputPdf:
+            pdfWriter.write(outputPdf)
+
+        print(nome)
