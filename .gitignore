@@ -6,10 +6,12 @@ ENV/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pdf
 
 # Configurações do Google API (Segurança)
 token.json
 credentials.json
+email_config.json
 
 # Banco de dados local
 db.sqlite3

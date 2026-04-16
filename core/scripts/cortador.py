@@ -12,19 +12,21 @@ class Cortador:
         holerite.seek(0)
         pdf_reader = PdfReader(holerite)
         num_pages = len(pdf_reader.pages)
-
+        dicionarioNomes = {}
         for page_number in range(num_pages):
             pdf_writer = PdfWriter()
             page = pdf_reader.pages[page_number]
             pdf_writer.add_page(page)
+            texto = page.extract_text() or ""
+            
+            nome = extrator.extrair_nome_h(texto)
+            dicionarioNomes["nome"] = nome
 
-            with open(f"pagina_{page_number + 1}.pdf", "wb") as outputPdf:
+            with open(f"{nome}.pdf", "wb") as outputPdf:
                 pdf_writer.write(outputPdf)
 
-            texto = page.extract_text() or ""
-            nome = extrator.extrair_nome_h(texto)
 
-            print(nome)
+            print(dicionarioNomes)
         
     def cortar_ponto(self, ponto):
         ponto.seek(0)
@@ -39,7 +41,7 @@ class Cortador:
             texto = page.extract_text() or ""
             nome = extrator.extrair_nome_p(texto)
 
-            with open(f"{nome}_pagina_{page_number + 1}.pdf", "wb") as outputPdf:
+            with open(f"{nome}.pdf", "wb") as outputPdf:
                 pdf_writer.write(outputPdf)
 
             print(nome)
