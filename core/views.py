@@ -2,7 +2,7 @@ import os
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.shortcuts import render, redirect
-from .scripts.cortador import cortarHolerite, cortarPonto
+from .scripts.cortador import Cortador
 from django.contrib import messages
 
 def index(request):
@@ -10,26 +10,26 @@ def index(request):
 
 def processar_dados(request):
     if request.method == 'POST':
-        data_sel = request.POST.get('data')
         pdf_h = request.FILES.get('holerites')
         pdf_p = request.FILES.get('ponto')
-
-        if data_sel and pdf_h and pdf_p:
+        cortador = Cortador()
+        
+        if pdf_h and pdf_p:
             try:
-                cortarHolerite(data_sel, pdf_h)
-                cortarPonto(data_sel, pdf_p)
+                cortador.cortar_holerite(pdf_h)
+                cortador.cortar_ponto(pdf_p)
                 messages.success(request, "Holerites e Ponos processados com sucesso")
             except Exception as e:
                 messages.error(request, f"Erro no processamento: {e}")
-        elif data_sel and pdf_h:
+        elif pdf_h:
             try:
-                cortarHolerite(data_sel, pdf_h)
+                cortador.cortar_holerite(pdf_h)
                 messages.success(request, "Holerites Processados com sucesso!")
             except Exception as e:
                 messages.error(request, f"Erro no processamento: {e}")
-        elif data_sel and pdf_p:
+        elif pdf_p:
             try:
-                cortarHolerite(data_sel, pdf_p)
+                cortador.cortar_ponto(pdf_p)
                 messages.success(request, "Ponto Processados com sucesso!")
             except Exception as e:
                 messages.error(request, f"Erro no processamento: {e}")
