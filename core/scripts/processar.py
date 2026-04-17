@@ -1,4 +1,5 @@
-from core.scripts.cortador import Cortador
+from core.scripts.escritor import Escritor
+from core.scripts.leitor import LeitorPdfs
 from django.contrib import messages
 from django.shortcuts import redirect
 
@@ -6,27 +7,40 @@ from django.shortcuts import redirect
 class ProcessarDados:
 
     def __init__(self):
-        # A classe não necessita de inicialização no momento.
         pass
 
     def processar(self, request):
         if request.method == "POST":
-            pdf_h = request.FILES.get("holerites")
-            pdf_p = request.FILES.get("ponto")
-            cortador = Cortador()
+            escritor = Escritor()
+            leitor = LeitorPdfs()
+
+            pdfs = [
+                ("holerite", request.FILES.get("holerites")),
+                ("ponto", request.FILES.get("ponto")),
+            ]
+
+            pdfs = [pdf for pdf in pdfs if pdf[1] is not None]
+
+            if not pdfs:
+                messages.warning(request, "Envie pelo menos um arquivo para processar.")
+                return redirect("index")
 
             try:
-                if pdf_h:
-                    cortador.cortar_holerite(pdf_h)
-                if pdf_p:
-                    cortador.cortar_ponto(pdf_p)
-                if pdf_p or pdf_h:
-                    messages.success(request, "Holerites e Ponos processados com sucesso")
-                else:
-                    messages.warning(request, "Preencha todos os campos e anexe o/os arquivo(s).")
+                for tipo, pdf in pdfs:
+                    if not pdf:
+                        continue
+
+                    resultados = leitor.ler_pdfs(tipo, pdf)
+
+                    for item in resultados:
+                        escritor.escrever_pdfs(item["nome"], item["page"])
+
+                messages.success(request, "Arquivos processados com sucesso")
+
             except Exception as e:
-                    messages.error(request, f"Erro no processamento: {e}")
-                
-        
+                messages.error(request, f"Erro no processamento: {e}")
+
+        else:
+            messages.warning(request, "Método de requisição inválido.")
 
         return redirect("index")
