@@ -21,7 +21,8 @@ class LeitorPdfs:
 
             resultados.append({
                 "nome": nome,
-                "page": page
+                "page": page,
+                "tipo": tipo
             })
 
         return resultados

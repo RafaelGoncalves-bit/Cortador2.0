@@ -33,7 +33,7 @@ class ProcessarDados:
                     resultados = leitor.ler_pdfs(tipo, pdf)
 
                     for item in resultados:
-                        escritor.escrever_pdfs(item["nome"], item["page"])
+                        escritor.escrever_pdfs(item["tipo"], item["nome"], item["page"])
 
                 messages.success(request, "Arquivos processados com sucesso")
 

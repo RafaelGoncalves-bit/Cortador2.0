@@ -10,4 +10,19 @@ class BuscarFuncionarios:
     def buscar_funcionarios(self):
         data = self.worksheet.get_all_values()
         df = pd.DataFrame(data[1:], columns=data[0])
-        return df
+        listadados = []
+        
+        #Mapeia as colunas
+        for _, row in df.iterrows():
+            nome = row["Nome do Funcionário"]
+            link = row["Link de Compartilhamento"]
+            email = row["E-mail"]
+            empresa = row["Empresa"]
+            dados = {"nome": nome, "link": link, "email": email, "empresa": empresa}
+            listadados.append(dados)
+
+            print(listadados)
+            
+    
+# buscar = BuscarFuncionarios()
+# df = buscar.buscar_funcionarios()
