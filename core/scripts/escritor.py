@@ -1,18 +1,26 @@
 from PyPDF2 import PdfWriter
-from core.scripts.leitor import LeitorPdfs
+from io import BytesIO
 
 class Escritor:
-    def __init__(self):
-        # A classe não necessita de inicialização no momento.
-        pass
 
-    def escrever_pdfs(self, tipo, nome, page):
+    def __init__(self, drive):
+        self.drive = drive
+
+    def escrever_pdfs(self, tipo, nome, page, pasta_id):
+
         pdf_writer = PdfWriter()
         pdf_writer.add_page(page)
-        
+
+        buffer = BytesIO()
+        pdf_writer.write(buffer)
+        buffer.seek(0)
+
         if tipo == "holerite":
-            with open("Holerite.pdf", "wb") as outputPdf:
-                pdf_writer.write(outputPdf)
+            nome_arquivo = f"Holerite.pdf"
         elif tipo == "ponto":
-            with open("Espelho Ponto.pdf", "wb") as outputPdf:
-                pdf_writer.write(outputPdf)
+            nome_arquivo = f"Espelho Ponto.pdf"
+        else:
+            nome_arquivo = f"Documento - {nome}.pdf"
+
+        # ENVIA PRO DRIVE
+        self.drive.upload_pdf(nome_arquivo, buffer, pasta_id)
