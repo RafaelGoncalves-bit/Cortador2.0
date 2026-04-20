@@ -37,9 +37,9 @@
         <form action="{% url 'processar_dados' %}" method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
-          <!-- <div class="mb-4">
-            <input class="p-2 w-25 text-center bg-dark text-light border rounded" type="date" name="data">
-          </div> -->
+            <h3 for="name" class="d-flex justify-content-center">Data</h3>
+            <input class="p-2 w-25 text-center bg-dark text-light border rounded mb-4 no-spinners" type="text" name="data" required placeholder="Ex: 04-2026">
+          
 
           <div class="d-flex justify-content-center gap-4 flex-wrap">
 
