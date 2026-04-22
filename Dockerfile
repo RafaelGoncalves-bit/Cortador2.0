@@ -1,21 +1,27 @@
 FROM python:3.11-slim
 
-# Impede que o Python gere arquivos .pyc e permite logs em tempo real
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Melhor práticas Python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Instala dependências do sistema (necessárias para algumas libs Python)
-RUN apt-get update && apt-get install -y \
-    libpq-dev gcc \
+# Dependências do sistema (mínimo necessário)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Copia requirements primeiro (melhora cache)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install gunicorn
 
+# Instala dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia projeto
 COPY . .
 
-# Comando para rodar o Gunicorn (servidor de produção)
-CMD ["/usr/local/bin/gunicorn", "--bind", "0.0.0.0:8000", "cortador.wsgi:application"]
+# Porta padrão
+EXPOSE 8000
+
+# Comando produção
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "cortador2.wsgi:application"]
