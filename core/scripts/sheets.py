@@ -27,13 +27,34 @@ class BuscarFuncionarios:
 
         lista_dados = []
 
-        for _, row in df.iterrows():
+        for index, row in df.iterrows():
             dados = {
                 "nome": row["Nome do Funcionário"],
                 "link": row["Link de Compartilhamento"],
                 "email": row["E-mail"],
-                "empresa": row["Empresa"]
+                "empresa": row["Empresa"],
+                "linha": index + 2
             }
             lista_dados.append(dados)
 
         return lista_dados
+    
+    def atualizar_link(self, linha, novo_link):
+        headers = self.worksheet.row_values(1)
+        print("DEBUG headers:", headers)
+
+        headers_normalizados = [h.strip() for h in headers]
+
+        try:
+            col_index = headers_normalizados.index("Link de Compartilhamento") + 1
+        except ValueError:
+            raise Exception(
+                f'Coluna "Link de Compartilhamento" não encontrada. Cabeçalhos encontrados: {headers_normalizados}'
+            )
+
+        print(f"DEBUG -> atualizando linha {linha}, coluna {col_index}, valor {novo_link}")
+
+        self.worksheet.update_cell(int(linha), col_index, novo_link)
+
+        valor_salvo = self.worksheet.cell(int(linha), col_index).value
+        print(f"Valor salvo na planilha: {valor_salvo}")

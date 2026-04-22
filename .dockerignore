@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django
+db.sqlite3
+media/
+
+
+# Google API & Auth
+# CUIDADO: Se você já tem o token.json e client_secret.json e QUER que eles 
+# entrem na imagem para a VPS já subir logada, NÃO os coloque aqui.
+# Se preferir passar via volume no docker-compose, adicione abaixo:
+# core/utils/token.json
+# core/utils/client_secret.json
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Mac/Windows/Ide
+.DS_Store
+.vscode/
+.idea/

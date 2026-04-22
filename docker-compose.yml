@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: cortador
+    restart: always
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - ./core/utils:/app/core/utils
+    ports:
+      - "8005:8000"
+
+volumes:
+  static_volume:

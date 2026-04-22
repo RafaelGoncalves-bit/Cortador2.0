@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-q0*_=^q+mw6ihoei6q624)#!@^$dabiou)g=2vbs3%ufh)-jyv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['cortador.agillecred.com.br', 'localhost']
+
+CSRF_TRUSTED_ORIGINS = ['https://cortador.agillecred.com.br']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition

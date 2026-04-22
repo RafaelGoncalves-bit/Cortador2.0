@@ -13,13 +13,14 @@ class ProcessarDados:
         self.drive = GoogleDrive()
         self.leitor = LeitorPdfs()
 
-        buscar = BuscarFuncionarios()
-        self.funcionarios = buscar.buscar_funcionarios()
+        self.sheets = BuscarFuncionarios()
+        self.funcionarios = self.sheets.buscar_funcionarios()
 
         self.comparador = Comparador(self.funcionarios)
-
-        # passa o drive pro escritor
         self.escritor = Escritor(self.drive)
+
+        # PASTA RAIZ
+        self.PASTA_RAIZ = "1p19gWb1gYH8OqcWNO6D-z_KmBGtRkAW3"
 
     def processar(self, request):
 
@@ -32,7 +33,7 @@ class ProcessarDados:
             ("ponto", request.FILES.get("ponto")),
         ]
         
-        data = request.POST.get("data")
+        data = request.POST.get("data")  # ex: 04-2026
 
         pdfs = [pdf for pdf in pdfs if pdf[1] is not None]
 
@@ -45,7 +46,6 @@ class ProcessarDados:
 
                 resultados = self.leitor.ler_pdfs(tipo, pdf)
 
-                # comparação 
                 dados_comparados = self.comparador.comparar(resultados)
 
                 for item in dados_comparados:
@@ -53,17 +53,47 @@ class ProcessarDados:
                     if item["status"] == "não encontrado":
                         print(f"{item['nome']} não encontrado - pulando")
                         continue
-                    
-                    id_pasta_destino = self.drive.criar_pasta(
-                        nome_pasta=data, 
-                        parent_id=item["pasta_id"]
+
+                    nome = item["nome"]
+                    link = item.get("link")
+                    linha = item.get("linha")  # ESSENCIAL
+
+                    # tenta extrair ID
+                    pasta_funcionario_id = self.drive.extrair_id_pasta(link)
+
+                    if not pasta_funcionario_id:
+                        pasta_funcionario_id = self.drive.criar_ou_buscar_pasta(
+                        nome,
+                        self.PASTA_RAIZ
+                        )
+
+                        link_novo = f"https://drive.google.com/drive/folders/{pasta_funcionario_id}"
+
+                        if linha is not None:
+                            self.sheets.atualizar_link(linha, link_novo)
+                            print(f"✅ Planilha atualizada para {nome}")
+                        else:
+                            print(f"❌ Linha não encontrada para {nome}")
+
+                        link_novo = f"https://drive.google.com/drive/folders/{pasta_funcionario_id}"
+
+                        # ATUALIZA PLANILHA
+                        if linha:
+                            self.sheets.atualizar_link(linha, link_novo)
+                            print(f"Planilha atualizada para {nome}")
+
+                    # cria pasta do mês
+                    pasta_mes_id = self.drive.criar_ou_buscar_pasta(
+                        data,
+                        pasta_funcionario_id
                     )
+
                     # ENVIA PRO DRIVE
                     self.escritor.escrever_pdfs(
                         tipo,
-                        item["nome"],
+                        nome,
                         item["page"],
-                        id_pasta_destino
+                        pasta_mes_id
                     )
 
             messages.success(request, "Arquivos processados com sucesso")
