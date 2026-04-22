@@ -1,10 +1,25 @@
+import unicodedata
+import re
+
 class Comparador:
 
     def __init__(self, funcionarios):
         self.funcionarios = funcionarios
 
     def normalizar(self, nome):
-        return str(nome).strip().lower()
+        nome = nome.lower().strip()
+
+        # remove acentos
+        nome = unicodedata.normalize('NFKD', nome)
+        nome = nome.encode('ascii', 'ignore').decode('utf-8')
+
+        # remove caracteres estranhos
+        nome = re.sub(r'[^a-z\s]', '', nome)
+
+        # remove espaços duplicados
+        nome = re.sub(r'\s+', ' ', nome)
+
+        return nome
     
     def extrair_id_pasta(self, link):
         if not link:

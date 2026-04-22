@@ -24,5 +24,6 @@ class LeitorPdfs:
                 "page": page,
                 "tipo": tipo
             })
+            
 
         return resultados

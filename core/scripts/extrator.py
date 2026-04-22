@@ -6,20 +6,58 @@ class ExtrairNomes:
         self.nome = nome
     
     def extrair_nome_h(self, texto):
-        linhas = texto.split('\n')
-        
         if not texto:
             return ""
 
-        for linha in linhas:
-            if "/" in linha:
-                partes = linha.strip().split()
+        texto = texto.replace("\n", " ")
 
-                for i, parte in enumerate(partes):
-                    if parte.isdigit():
-                        return " ".join(partes[i+1:])
+        # pega tudo que parece nome (2+ palavras maiúsculas)
+        candidatos = re.findall(r'\b[A-ZÀ-Ÿ]{2,}(?:\s+[A-ZÀ-Ÿ]{2,}){1,5}\b', texto)
 
-        return ""
+        nomes_validos = []
+
+        for nome in candidatos:
+            nome = self.limpar_nome(nome)
+
+            if self.nome_valido(nome):
+                nomes_validos.append(nome)
+
+        if not nomes_validos:
+            return ""
+
+        # retorna o maior nome (geralmente o completo)
+        return max(nomes_validos, key=len)
+    
+    def limpar_nome(self, nome):
+        cortes = [
+            " ANALISTA", " AUXILIAR", " ASSISTENTE",
+            " AGENTE", " GERENTE", " COORDENADOR",
+            " SUPERVISOR", " VENDEDOR"
+        ]
+
+        for corte in cortes:
+            if corte in nome:
+                nome = nome.split(corte)[0]
+
+        return nome.strip()
+    
+    def nome_valido(self, nome):
+        termos_invalidos = [
+            "LTDA", "EMPRESA", "CNPJ", "RUA",
+            "RECIBO", "SALARIO", "PAGAMENTO",
+            "FINANCEIRAS", "AGILLE",
+            "CAPITAL", "NEGOCIOS", "INTERMEDIACAO",
+            "CONDESSA", "ALVARES", "PENTEADO",  # 🔥 ESSA LINHA resolve seu problema
+            "ARARAS", "SP"
+        ]
+
+        if len(nome.split()) < 2:
+            return False
+
+        if any(t in nome for t in termos_invalidos):
+            return False
+
+        return True
     
     def extrair_nome_p(self, texto):
         if not texto:
