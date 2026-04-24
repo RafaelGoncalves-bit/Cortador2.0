@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: ghcr.io/rafaelgoncalves-bit/cortador:latest
     container_name: cortador
     restart: always
 
@@ -13,7 +13,7 @@ services:
     ports:
       - "8005:8000"
 
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn cortador2.wsgi:application --bind 0.0.0.0:8000 --timeout 300
 
     environment:
       - DEBUG=1

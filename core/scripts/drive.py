@@ -1,4 +1,5 @@
 import os
+import json
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -19,19 +20,40 @@ class GoogleDrive:
     def _autenticar(self):
         creds = None
         token_path = os.path.join(settings.BASE_DIR, 'core/utils/token.json')
-        client_secret_path = os.path.join(settings.BASE_DIR, 'core/utils/client_secret.json')
+        client_secret_path = os.path.join(settings.BASE_DIR, 'core/utils/cliente_secret.json')
 
+        # LER TOKEN COM PROTEÇÃO
         if os.path.exists(token_path):
-            creds = Credentials.from_authorized_user_file(token_path, self.SCOPES)
+            try:
+                with open(token_path, 'r') as token:
+                    info = json.load(token)
 
+                # só usa se tiver refresh_token
+                if "refresh_token" in info:
+                    creds = Credentials.from_authorized_user_info(info, self.SCOPES)
+                else:
+                    print("⚠️ Token inválido (sem refresh_token)")
+                    creds = None
+            except:
+                creds = None
+
+        # 🔄 FLUXO NORMAL
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    client_secret_path, self.SCOPES)
-                creds = flow.run_local_server(port=8080)
+                    client_secret_path, self.SCOPES
+                )
 
+                # FORÇA GERAR refresh_token
+                creds = flow.run_local_server(
+                    port=8080,
+                    prompt='consent',
+                    access_type='offline'
+                )
+
+            # 💾 SALVA TOKEN CORRETO
             with open(token_path, 'w') as token:
                 token.write(creds.to_json())
 
@@ -136,16 +158,6 @@ class GoogleDrive:
     # 🚀 PROCESSAMENTO COMPLETO
     # =============================
     def processar_funcionarios(self, funcionarios, pasta_raiz_id, mes_ano):
-        """
-        funcionarios = [
-            {
-                "nome": "João",
-                "link": "",
-                "holerite": arquivo_bytes,
-                "ponto": arquivo_bytes
-            }
-        ]
-        """
 
         resultado = []
 
@@ -155,23 +167,19 @@ class GoogleDrive:
             holerite = f.get("holerite")
             ponto = f.get("ponto")
 
-            # 🔎 pasta do funcionário
             pasta_funcionario_id = self.extrair_id_pasta(link)
 
-            # ❌ não existe → cria
             if not pasta_funcionario_id:
                 pasta_funcionario_id = self.criar_ou_buscar_pasta(
                     nome,
                     pasta_raiz_id
                 )
 
-            # 📁 pasta do mês
             pasta_mes_id = self.criar_ou_buscar_pasta(
                 mes_ano,
                 pasta_funcionario_id
             )
 
-            # 📤 upload arquivos
             if holerite:
                 self.upload_pdf(
                     f"Holerite_{mes_ano}.pdf",

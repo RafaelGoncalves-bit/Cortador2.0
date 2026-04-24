@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-q0*_=^q+mw6ihoei6q624)#!@^$dabiou)g=2vbs3%ufh)-jyv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cortador.agillecred.com.br', 'localhost']
+ALLOWED_HOSTS = ['cortador2.agillecred.com.br', 'localhost']
 
 CSRF_TRUSTED_ORIGINS = ['https://cortador.agillecred.com.br']
 
@@ -121,3 +122,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
