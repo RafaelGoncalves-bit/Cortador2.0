@@ -7,3 +7,4 @@ class CortadorTest(TestCase):
     
     def test_200_response(self):
         self.assertEqual(200, self.resp.status_code)
+        

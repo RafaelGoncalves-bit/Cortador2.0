@@ -1,66 +1,15 @@
-import os
-import json
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-from django.conf import settings
+from googleapiclient.discovery import build
+from core.service.drive.auth_service import AuthDrive
 
-
-class GoogleDrive:
+class Drive:
+    
     def __init__(self):
-        self.SCOPES = ['https://www.googleapis.com/auth/drive']
-        self.creds = self._autenticar()
+        self.auth = AuthDrive()
+        self.creds = self.auth._autenticar()
         self.service = build('drive', 'v3', credentials=self.creds)
-
-    # =============================
-    # 🔐 AUTENTICAÇÃO
-    # =============================
-    def _autenticar(self):
-        creds = None
-        token_path = os.path.join(settings.BASE_DIR, 'core/utils/token.json')
-        client_secret_path = os.path.join(settings.BASE_DIR, 'core/utils/cliente_secret.json')
-
-        # LER TOKEN COM PROTEÇÃO
-        if os.path.exists(token_path):
-            try:
-                with open(token_path, 'r') as token:
-                    info = json.load(token)
-
-                # só usa se tiver refresh_token
-                if "refresh_token" in info:
-                    creds = Credentials.from_authorized_user_info(info, self.SCOPES)
-                else:
-                    print("⚠️ Token inválido (sem refresh_token)")
-                    creds = None
-            except:
-                creds = None
-
-        # 🔄 FLUXO NORMAL
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    client_secret_path, self.SCOPES
-                )
-
-                # FORÇA GERAR refresh_token
-                creds = flow.run_local_server(
-                    port=8080,
-                    prompt='consent',
-                    access_type='offline'
-                )
-
-            # 💾 SALVA TOKEN CORRETO
-            with open(token_path, 'w') as token:
-                token.write(creds.to_json())
-
-        return creds
-
-    # =============================
-    # 📁 CRIAR OU BUSCAR PASTA
+ # =============================
+    # CRIAR OU BUSCAR PASTA
     # =============================
     def criar_ou_buscar_pasta(self, nome_pasta, parent_id):
         nome_pasta = str(nome_pasta).strip()
@@ -99,7 +48,7 @@ class GoogleDrive:
         return pasta.get('id')
 
     # =============================
-    # 🔎 EXTRAIR ID DO LINK
+    # EXTRAIR ID DO LINK
     # =============================
     def extrair_id_pasta(self, link):
         if not link:
@@ -111,7 +60,7 @@ class GoogleDrive:
         return link
 
     # =============================
-    # 📄 VERIFICAR SE ARQUIVO EXISTE
+    # VERIFICAR SE ARQUIVO EXISTE
     # =============================
     def arquivo_existe(self, nome_arquivo, parent_id):
         query = (
@@ -127,7 +76,7 @@ class GoogleDrive:
         return len(response.get("files", [])) > 0
 
     # =============================
-    # 📤 UPLOAD PDF
+    # UPLOAD PDF
     # =============================
     def upload_pdf(self, nome_arquivo, arquivo_bytes, parent_id):
         if self.arquivo_existe(nome_arquivo, parent_id):

@@ -1,7 +1,7 @@
 from PyPDF2 import PdfReader
-import core.scripts.extrator as extrator
+import core.service.pdf.extrator_service as extrator_service
 
-extrair = extrator.ExtrairNomes("")
+extrair = extrator_service.ExtrairNomes("")
 
 class LeitorPdfs:
 

@@ -1,26 +1,30 @@
-from core.scripts.escritor import Escritor
-from core.scripts.leitor import LeitorPdfs
+
+import os
+from dotenv import load_dotenv
+from core.service.pdf.escritor_service import Escritor
+from core.service.pdf.leitor_service import LeitorPdfs
 from django.contrib import messages
 from django.shortcuts import redirect
-from core.scripts.drive import GoogleDrive
-from core.scripts.sheets import BuscarFuncionarios
-from core.scripts.comparar_nomes import Comparador
+from core.service.drive.drive_service import Drive
+from core.service.sheets_service import BuscarFuncionarios
+from core.service.comparar_nomes_service import Comparador
 
 
 class ProcessarDados:
 
     def __init__(self):
-        self.drive = GoogleDrive()
+        load_dotenv() #Carrega arquivo .ENV
+        
+        #Pega os valores do .ENV
+        self.PASTA_RAIZ = os.getenv('PASTA_RAIZ')
+        
+        #Define as classes
+        self.drive = Drive()
         self.leitor = LeitorPdfs()
-
         self.sheets = BuscarFuncionarios()
         self.funcionarios = self.sheets.buscar_funcionarios()
-
         self.comparador = Comparador(self.funcionarios)
         self.escritor = Escritor(self.drive)
-
-        # PASTA RAIZ
-        self.PASTA_RAIZ = "1p19gWb1gYH8OqcWNO6D-z_KmBGtRkAW3"
 
     def processar(self, request):
 

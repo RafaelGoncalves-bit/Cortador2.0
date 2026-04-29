@@ -30,7 +30,7 @@ class Comparador:
 
     def comparar(self, resultados):
 
-        # 🔥 agora guarda o funcionario completo
+        # agora guarda o funcionario completo
         mapa_funcionarios = {
             self.normalizar(f["nome"]): f
             for f in self.funcionarios

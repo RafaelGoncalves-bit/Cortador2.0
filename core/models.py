@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+class CortadorModel(models.Model):
+    numero = models.CharField(max_length=50)
+    dataRecarga = models.DateField(auto_now=True)
