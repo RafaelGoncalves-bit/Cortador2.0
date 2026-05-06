@@ -1,17 +1,18 @@
 version: '3.8'
 
 services:
-  app:
+  cortador:
     image: ghcr.io/rafaelgoncalves-bit/cortador:latest
-    container_name: cortador
     restart: always
 
     volumes:
-      - .:/app
       - static_volume:/app/static
 
     ports:
       - "8005:8000"
+
+    networks:
+      - global_network
 
     command: gunicorn cortador2.wsgi:application --bind 0.0.0.0:8000 --timeout 300
 
@@ -20,3 +21,8 @@ services:
 
 volumes:
   static_volume:
+
+networks:
+  global_network:
+    external: true
+    name: global_network

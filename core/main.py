@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from core.service.drive.drive_service import Drive
 from core.service.sheets_service import BuscarFuncionarios
 from core.service.comparar_nomes_service import Comparador
+from django.conf import settings
 
 
 class ProcessarDados:
@@ -28,6 +29,7 @@ class ProcessarDados:
 
     def processar(self, request):
 
+
         if request.method != "POST":
             messages.warning(request, "Método de requisição inválido.")
             return redirect("index")
@@ -38,6 +40,10 @@ class ProcessarDados:
         ]
         
         data = request.POST.get("data")  # ex: 04-2026
+        
+        if not data:
+            messages.warning(request, "Informe a data (ex: 04-2026).")
+            return redirect("index")
 
         pdfs = [pdf for pdf in pdfs if pdf[1] is not None]
 
@@ -80,11 +86,6 @@ class ProcessarDados:
                             print(f"❌ Linha não encontrada para {nome}")
 
                         link_novo = f"https://drive.google.com/drive/folders/{pasta_funcionario_id}"
-
-                        # ATUALIZA PLANILHA
-                        if linha:
-                            self.sheets.atualizar_link(linha, link_novo)
-                            print(f"Planilha atualizada para {nome}")
 
                     # cria pasta do mês
                     pasta_mes_id = self.drive.criar_ou_buscar_pasta(
